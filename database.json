@@ -1,0 +1,67 @@
+{
+  "participants": [
+    {
+      "id": "p1",
+      "name": "Ahmed Khan",
+      "date": "2025-03-17T10:30:00Z",
+      "amount": 500,
+      "paymentMethod": "Cash",
+      "transactionId": ""
+    },
+    {
+      "id": "p2",
+      "name": "Fatima Rahman",
+      "date": "2025-03-16T14:15:00Z",
+      "amount": 400,
+      "paymentMethod": "bKash",
+      "transactionId": "BK123456789"
+    },
+    {
+      "id": "p3",
+      "name": "Mohammad Ali",
+      "date": "2025-03-15T16:45:00Z",
+      "amount": 350,
+      "paymentMethod": "Cash",
+      "transactionId": ""
+    }
+  ],
+  "products": [
+    {
+      "id": "prod1",
+      "name": "Biriyani",
+      "price": 150,
+      "quantity": 12,
+      "status": "Not Purchased"
+    },
+    {
+      "id": "prod2",
+      "name": "Juice",
+      "price": 30,
+      "quantity": 12,
+      "status": "Purchased"
+    },
+    {
+      "id": "prod3",
+      "name": "Water",
+      "price": 15,
+      "quantity": 12,
+      "status": "Not Purchased"
+    }
+  ],
+  "authCodes": [
+    {
+      "id": "auth1",
+      "code": "AFTABx7766",
+      "createdBy": "Admin",
+      "createdAt": "2025-03-01T00:00:00Z",
+      "isActive": true
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "eventName": "BATCH-22 IFTAR PARTY",
+    "eventDate": "26/3/25 (25th Ramadan 1446 AH)",
+    "eventVenue": "Balakhal J.N High School",
+    "minParticipationAmount": 400
+  }
+}

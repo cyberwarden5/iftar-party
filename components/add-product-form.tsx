@@ -11,13 +11,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { supabase } from "@/lib/supabase"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   price: z.coerce.number().min(1, { message: "Price is required" }),
   quantity: z.coerce.number().min(1, { message: "Quantity is required" }),
-  purchase_status: z.enum(["purchased", "not_purchased"]),
+  status: z.enum(["Purchased", "Not Purchased"]),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -26,10 +25,6 @@ interface AddProductFormProps {
   product?: any
   paidParticipantsCount: number
   onSuccess: () => void
-  supabaseAvailable?: boolean
-  existingProducts?: any[]
-  onUpdate?: (product: any) => void
-  onAdd?: (product: any) => void
 }
 
 export default function AddProductForm({

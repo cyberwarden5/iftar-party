@@ -5,15 +5,7 @@ import { DollarSign, TrendingDown, TrendingUp, Wallet } from "lucide-react"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { supabase } from "@/lib/supabase"
-
-// Sample data for when Supabase is not configured
-const sampleFinancialData = {
-  totalCollected: 5850,
-  totalSpent: 3750,
-  totalRemaining: 2100,
-  participantCount: 12,
-}
+import { JsonDatabase } from "@/lib/json-db"
 
 export default function FinancialSummary() {
   const [financialData, setFinancialData] = useState({
@@ -21,47 +13,21 @@ export default function FinancialSummary() {
     totalSpent: 0,
     totalRemaining: 0,
     participantCount: 0,
+    paidCount: 0,
+    averageContribution: 0,
   })
   const [loading, setLoading] = useState(true)
-  const [supabaseAvailable, setSupabaseAvailable] = useState(true)
 
   useEffect(() => {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setSupabaseAvailable(false)
-      setFinancialData(sampleFinancialData)
-      setLoading(false)
-      return
-    }
-
-    const fetchData = async () => {
+    JsonDatabase.initialize()
+    
+    const fetchData = () => {
       try {
         setLoading(true)
-
-        // Get participants data
-        const { data: participants, error: participantsError } = await supabase.from("participants").select("amount")
-
-        if (participantsError) throw participantsError
-
-        // Get products data
-        const { data: products, error: productsError } = await supabase.from("products").select("price, quantity")
-
-        if (productsError) throw productsError
-
-        // Calculate financial data
-        const totalCollected = participants?.reduce((sum, p) => sum + p.amount, 0) || 0
-        const totalSpent = products?.reduce((sum, p) => sum + p.price * p.quantity, 0) || 0
-
-        setFinancialData({
-          totalCollected,
-          totalSpent,
-          totalRemaining: totalCollected - totalSpent,
-          participantCount: participants?.length || 0,
-        })
+        const data = JsonDatabase.getFinancialData()
+        setFinancialData(data)
       } catch (error) {
-        console.error("Failed to fetch financial data:", error)
-        // Fall back to sample data
-        setFinancialData(sampleFinancialData)
+        console.error("[v0] Failed to fetch financial data:", error)
       } finally {
         setLoading(false)
       }
@@ -69,46 +35,14 @@ export default function FinancialSummary() {
 
     fetchData()
 
-    // Only set up subscriptions if Supabase is available
-    if (supabaseAvailable) {
-      // Set up real-time subscription for participants
-      const participantsSubscription = supabase
-        .channel("participants-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "participants",
-          },
-          () => {
-            fetchData()
-          },
-        )
-        .subscribe()
-
-      // Set up real-time subscription for products
-      const productsSubscription = supabase
-        .channel("products-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "products",
-          },
-          () => {
-            fetchData()
-          },
-        )
-        .subscribe()
-
-      return () => {
-        participantsSubscription.unsubscribe()
-        productsSubscription.unsubscribe()
-      }
+    // Listen for database changes
+    const handleDatabaseChange = () => {
+      fetchData()
     }
-  }, [supabaseAvailable])
+
+    window.addEventListener("databaseChange", handleDatabaseChange)
+    return () => window.removeEventListener("databaseChange", handleDatabaseChange)
+  }, [])
 
   const spendingPercentage = financialData.totalCollected
     ? Math.min(100, Math.round((financialData.totalSpent / financialData.totalCollected) * 100))
@@ -196,14 +130,6 @@ export default function FinancialSummary() {
           </CardContent>
         </Card>
       </div>
-
-      {!supabaseAvailable && (
-        <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-md text-yellow-200">
-          <p className="text-sm">
-            <strong>Note:</strong> Displaying sample data. Connect Supabase for real-time data.
-          </p>
-        </div>
-      )}
     </div>
   )
 }

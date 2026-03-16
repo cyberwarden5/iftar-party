@@ -11,14 +11,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/components/ui/use-toast"
-import { supabase } from "@/lib/supabase"
-import { updateProductQuantities, getPaidParticipantsCount } from "@/lib/product-utils"
+import { JsonDatabase } from "@/lib/json-db"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   amount: z.coerce.number().min(1, { message: "Amount is required" }),
-  payment_method: z.enum(["Cash", "bKash"]),
-  transaction_id: z.string().optional(),
+  paymentMethod: z.enum(["Cash", "bKash"]),
+  transactionId: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -26,19 +25,11 @@ type FormValues = z.infer<typeof formSchema>
 interface AddParticipantFormProps {
   participant?: any
   onSuccess: () => void
-  supabaseAvailable?: boolean
-  existingParticipants?: any[]
-  onUpdate?: (participant: any) => void
-  onAdd?: (participant: any) => void
 }
 
 export default function AddParticipantForm({
   participant,
   onSuccess,
-  supabaseAvailable = true,
-  existingParticipants = [],
-  onUpdate,
-  onAdd,
 }: AddParticipantFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
@@ -48,18 +39,21 @@ export default function AddParticipantForm({
     defaultValues: {
       name: participant?.name || "",
       amount: participant?.amount || 400,
-      payment_method: participant?.payment_method || "Cash",
-      transaction_id: participant?.transaction_id || "",
+      paymentMethod: participant?.paymentMethod || "Cash",
+      transactionId: participant?.transactionId || "",
     },
   })
 
-  const paymentMethod = form.watch("payment_method")
+  const paymentMethod = form.watch("paymentMethod")
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true)
     try {
+      // Get all participants to check for duplicates
+      const allParticipants = JsonDatabase.getParticipants()
+
       // Check for duplicate participant name
-      const isDuplicate = existingParticipants.some(
+      const isDuplicate = allParticipants.some(
         (p) => p.name.toLowerCase() === values.name.toLowerCase() && (!participant || p.id !== participant.id),
       )
 
@@ -73,112 +67,48 @@ export default function AddParticipantForm({
         return
       }
 
-      if (supabaseAvailable) {
-        let shouldUpdateProductQuantities = false
-        let wasUnderMinimum = false
-        let isNowMinimum = false
+      if (participant) {
+        // Update existing participant
+        const updated = JsonDatabase.updateParticipant(participant.id, {
+          name: values.name,
+          amount: values.amount,
+          paymentMethod: values.paymentMethod,
+          transactionId: values.transactionId || "",
+          date: participant.date, // Keep original date
+        })
 
-        if (participant) {
-          // Check if payment amount changed and might affect product quantities
-          wasUnderMinimum = participant.amount < 400
-          isNowMinimum = values.amount >= 400
-          shouldUpdateProductQuantities = wasUnderMinimum && isNowMinimum
-
-          // Update existing participant
-          const { error } = await supabase
-            .from("participants")
-            .update({
-              ...values,
-              // Keep the original date
-            })
-            .eq("id", participant.id)
-
-          if (error) throw error
-
-          toast({
-            title: "Success",
-            description: "Participant updated successfully",
-          })
-
-          if (onUpdate) {
-            onUpdate({
-              ...participant,
-              ...values,
-            })
-          }
-        } else {
-          // Add new participant
-          const { data, error } = await supabase
-            .from("participants")
-            .insert({
-              ...values,
-              date: new Date().toISOString(),
-            })
-            .select()
-
-          if (error) throw error
-
-          toast({
-            title: "Success",
-            description: "Participant added successfully",
-          })
-
-          if (onAdd && data) {
-            onAdd(data[0])
-          }
-
-          // If the new participant paid the minimum amount, update product quantities
-          shouldUpdateProductQuantities = values.amount >= 400
-        }
-
-        // Update product quantities if needed
-        if (shouldUpdateProductQuantities) {
-          try {
-            // Get updated paid participants count
-            const paidCount = await getPaidParticipantsCount()
-
-            // Update product quantities
-            await updateProductQuantities(paidCount)
-
-            if (wasUnderMinimum && isNowMinimum) {
-              toast({
-                title: "Products Updated",
-                description: "Product quantities have been updated based on the new participant status.",
-              })
-            }
-          } catch (error) {
-            console.error("Failed to update product quantities:", error)
-            // Don't fail the whole operation if this part fails
-          }
-        }
-      } else {
-        // Demo mode without Supabase
-        if (participant) {
-          if (onUpdate) {
-            onUpdate({
-              ...participant,
-              ...values,
-            })
-          }
-        } else {
-          if (onAdd) {
-            onAdd({
-              ...values,
-              date: new Date().toISOString(),
-            })
-          }
+        if (!updated) {
+          throw new Error("Failed to update participant")
         }
 
         toast({
-          title: "Success",
-          description: participant ? "Participant updated successfully" : "Participant added successfully",
+          title: "Success ✨",
+          description: "Participant updated successfully",
+        })
+      } else {
+        // Add new participant
+        const added = JsonDatabase.addParticipant({
+          name: values.name,
+          amount: values.amount,
+          paymentMethod: values.paymentMethod,
+          transactionId: values.transactionId || "",
+          date: new Date().toISOString(),
+        })
+
+        if (!added) {
+          throw new Error("Failed to add participant")
+        }
+
+        toast({
+          title: "Success ✨",
+          description: "Participant added successfully",
         })
       }
 
       form.reset()
       onSuccess()
     } catch (error) {
-      console.error("Failed to save participant:", error)
+      console.error("[v0] Failed to save participant:", error)
       toast({
         variant: "destructive",
         title: "Error",
@@ -198,12 +128,12 @@ export default function AddParticipantForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-100">Participant Name</FormLabel>
+                <FormLabel className="text-blue-100">👤 Participant Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter name"
                     {...field}
-                    className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500"
+                    className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500 focus:border-blue-400 focus:ring focus:ring-blue-400/20 transition-all duration-300"
                   />
                 </FormControl>
                 <FormMessage />
@@ -216,13 +146,13 @@ export default function AddParticipantForm({
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-100">Amount</FormLabel>
+                <FormLabel className="text-blue-100">💰 Amount (৳)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     placeholder="400"
                     {...field}
-                    className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500"
+                    className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500 focus:border-blue-400 focus:ring focus:ring-blue-400/20 transition-all duration-300"
                   />
                 </FormControl>
                 <FormDescription className="text-slate-400">Minimum contribution is ৳400</FormDescription>
@@ -234,27 +164,27 @@ export default function AddParticipantForm({
 
         <FormField
           control={form.control}
-          name="payment_method"
+          name="paymentMethod"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-blue-100">Payment Method</FormLabel>
+              <FormLabel className="text-blue-100">💳 Payment Method</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="flex flex-col space-y-1"
+                  className="flex flex-col space-y-2"
                 >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem className="flex items-center space-x-3 space-y-0 p-3 rounded-lg hover:bg-blue-950/30 transition-colors duration-300">
                     <FormControl>
                       <RadioGroupItem value="Cash" />
                     </FormControl>
-                    <FormLabel className="font-normal text-white">Cash</FormLabel>
+                    <FormLabel className="font-normal text-white cursor-pointer">💵 Cash</FormLabel>
                   </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
+                  <FormItem className="flex items-center space-x-3 space-y-0 p-3 rounded-lg hover:bg-blue-950/30 transition-colors duration-300">
                     <FormControl>
                       <RadioGroupItem value="bKash" />
                     </FormControl>
-                    <FormLabel className="font-normal text-white">bKash</FormLabel>
+                    <FormLabel className="font-normal text-white cursor-pointer">📱 bKash</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -266,15 +196,15 @@ export default function AddParticipantForm({
         {paymentMethod === "bKash" && (
           <FormField
             control={form.control}
-            name="transaction_id"
+            name="transactionId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-100">Transaction ID</FormLabel>
+                <FormLabel className="text-blue-100">🔐 Transaction ID</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter bKash transaction ID"
                     {...field}
-                    className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500"
+                    className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500 focus:border-blue-400 focus:ring focus:ring-blue-400/20 transition-all duration-300"
                   />
                 </FormControl>
                 <FormMessage />
@@ -288,20 +218,20 @@ export default function AddParticipantForm({
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="border-blue-800/30 text-blue-300 hover:bg-blue-950/50 hover:text-blue-100"
+            className="border-blue-800/30 text-blue-300 hover:bg-blue-950/50 hover:text-blue-100 transition-all duration-300"
           >
-            Cancel
+            ✕ Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button type="submit" disabled={isSubmitting} className="ramadan-button transition-all duration-300 hover:shadow-lg hover:shadow-amber-400/50">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : participant ? (
-              "Update Participant"
+              "✏️ Update Participant"
             ) : (
-              "Add Participant"
+              "✨ Add Participant"
             )}
           </Button>
         </div>

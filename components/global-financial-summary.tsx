@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { TrendingDown, Wallet } from "lucide-react"
-import { supabase } from "@/lib/supabase"
-
-// Sample data for when Supabase is not configured
-const sampleFinancialData = {
-  totalCollected: 5850,
-  totalSpent: 3750,
-}
+import { JsonDatabase } from "@/lib/json-db"
 
 export default function GlobalFinancialSummary() {
   const [financialData, setFinancialData] = useState({
@@ -16,90 +10,34 @@ export default function GlobalFinancialSummary() {
     totalSpent: 0,
   })
   const [loading, setLoading] = useState(true)
-  const [supabaseAvailable, setSupabaseAvailable] = useState(true)
 
   useEffect(() => {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setSupabaseAvailable(false)
-      setFinancialData(sampleFinancialData)
-      setLoading(false)
-      return
-    }
-
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-
-        // Get participants data
-        const { data: participants, error: participantsError } = await supabase.from("participants").select("amount")
-
-        if (participantsError) throw participantsError
-
-        // Get products data
-        const { data: products, error: productsError } = await supabase.from("products").select("price, quantity")
-
-        if (productsError) throw productsError
-
-        // Calculate financial data
-        const totalCollected = participants?.reduce((sum, p) => sum + p.amount, 0) || 0
-        const totalSpent = products?.reduce((sum, p) => sum + p.price * p.quantity, 0) || 0
-
-        setFinancialData({
-          totalCollected,
-          totalSpent,
-        })
-      } catch (error) {
-        console.error("Failed to fetch financial data:", error)
-        // Fall back to sample data
-        setFinancialData(sampleFinancialData)
-      } finally {
-        setLoading(false)
-      }
-    }
-
+    JsonDatabase.initialize()
     fetchData()
 
-    // Only set up subscriptions if Supabase is available
-    if (supabaseAvailable) {
-      // Set up real-time subscription for participants
-      const participantsSubscription = supabase
-        .channel("global-participants-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "participants",
-          },
-          () => {
-            fetchData()
-          },
-        )
-        .subscribe()
-
-      // Set up real-time subscription for products
-      const productsSubscription = supabase
-        .channel("global-products-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "products",
-          },
-          () => {
-            fetchData()
-          },
-        )
-        .subscribe()
-
-      return () => {
-        participantsSubscription.unsubscribe()
-        productsSubscription.unsubscribe()
-      }
+    // Listen for database changes
+    const handleDatabaseChange = () => {
+      fetchData()
     }
-  }, [supabaseAvailable])
+
+    window.addEventListener("databaseChange", handleDatabaseChange)
+    return () => window.removeEventListener("databaseChange", handleDatabaseChange)
+  }, [])
+
+  const fetchData = () => {
+    try {
+      setLoading(true)
+      const data = JsonDatabase.getFinancialData()
+      setFinancialData({
+        totalCollected: data.totalCollected,
+        totalSpent: data.totalSpent,
+      })
+    } catch (error) {
+      console.error("[v0] Failed to fetch financial data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (loading) {
     return (

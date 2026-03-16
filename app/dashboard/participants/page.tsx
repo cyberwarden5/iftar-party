@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import AddParticipantForm from "@/components/add-participant-form"
-import { supabase } from "@/lib/supabase"
+import { JsonDatabase } from "@/lib/json-db"
 import { useToast } from "@/components/ui/use-toast"
 import {
   AlertDialog,
@@ -31,37 +31,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// Update the imports
 import AdvancedPdfGenerator from "@/components/advanced-pdf-generator"
 import DirectPdfDownload from "@/components/direct-pdf-download"
-
-// Sample data for when Supabase is not configured
-const sampleParticipants = [
-  {
-    id: "1",
-    name: "Ahmed Khan",
-    date: new Date().toISOString(),
-    amount: 500,
-    payment_method: "Cash",
-    transaction_id: null,
-  },
-  {
-    id: "2",
-    name: "Fatima Rahman",
-    date: new Date(Date.now() - 86400000).toISOString(),
-    amount: 400,
-    payment_method: "bKash",
-    transaction_id: "BK123456789",
-  },
-  {
-    id: "3",
-    name: "Mohammad Ali",
-    date: new Date(Date.now() - 172800000).toISOString(),
-    amount: 350,
-    payment_method: "Cash",
-    transaction_id: null,
-  },
-]
 
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<any[]>([])
@@ -79,25 +50,12 @@ export default function ParticipantsPage() {
 
   // Function to fetch participants data
   const fetchParticipants = async () => {
-    setIsLoading(true)
     try {
-      // Check if Supabase is configured
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        setParticipants(sampleParticipants)
-        setIsLoading(false)
-        setIsRefreshing(false)
-        return
-      }
-
-      // Fetch participants
-      const { data, error } = await supabase.from("participants").select("*").order("date", { ascending: false })
-
-      if (error) {
-        console.error("Error fetching participants:", error)
-        throw error
-      }
-
-      setParticipants(data || [])
+      setIsLoading(true)
+      JsonDatabase.initialize()
+      const data = JsonDatabase.getParticipants()
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      setParticipants(data)
     } catch (error) {
       console.error("Error fetching data:", error)
       toast({
@@ -105,8 +63,6 @@ export default function ParticipantsPage() {
         title: "Error",
         description: "Failed to load participants. Please try again.",
       })
-      // Fall back to sample data
-      setParticipants(sampleParticipants)
     } finally {
       setIsLoading(false)
       setIsRefreshing(false)
@@ -117,49 +73,31 @@ export default function ParticipantsPage() {
   useEffect(() => {
     fetchParticipants()
 
-    // Set up real-time subscription
-    const subscription = supabase
-      .channel("participants-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "participants",
-        },
-        () => {
-          fetchParticipants()
-        },
-      )
-      .subscribe()
-
-    return () => {
-      subscription.unsubscribe()
+    // Listen for database changes
+    const handleDatabaseChange = () => {
+      fetchParticipants()
     }
+
+    window.addEventListener("databaseChange", handleDatabaseChange)
+    return () => window.removeEventListener("databaseChange", handleDatabaseChange)
   }, [])
 
   const handleDelete = async () => {
     if (!participantToDelete) return
 
     try {
-      console.log("Deleting participant:", participantToDelete)
+      console.log("[v0] Deleting participant:", participantToDelete)
 
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        const { error } = await supabase.from("participants").delete().eq("id", participantToDelete)
-
-        if (error) {
-          console.error("Error deleting participant:", error)
-          throw error
-        }
-
-        console.log("Participant deleted successfully")
-      } else {
-        // Demo mode - update local state
-        setParticipants(participants.filter((p) => p.id !== participantToDelete))
+      const success = JsonDatabase.deleteParticipant(participantToDelete)
+      
+      if (!success) {
+        throw new Error("Failed to delete participant")
       }
 
+      console.log("[v0] Participant deleted successfully")
+
       toast({
-        title: "Success",
+        title: "Success ✨",
         description: "Participant deleted successfully",
       })
 
@@ -363,37 +301,37 @@ export default function ParticipantsPage() {
                     filteredParticipants.map((participant) => (
                       <TableRow
                         key={participant.id}
-                        className={`border-blue-800/30 hover:bg-blue-950/20 ${
+                        className={`border-blue-800/30 hover:bg-blue-950/20 transition-all duration-300 ${
                           participant.amount >= 400 ? "bg-green-900/10" : ""
                         }`}
                       >
-                        <TableCell className="font-medium">{participant.name}</TableCell>
-                        <TableCell>{new Date(participant.date).toLocaleDateString()}</TableCell>
-                        <TableCell>৳{participant.amount.toLocaleString()}</TableCell>
+                        <TableCell className="font-medium text-white">{participant.name}</TableCell>
+                        <TableCell className="text-slate-300">{new Date(participant.date).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-green-400 font-semibold">৳{participant.amount.toLocaleString()}</TableCell>
                         <TableCell>
                           <Badge
                             variant="outline"
                             className={
-                              participant.payment_method === "Cash"
-                                ? "border-green-500 text-green-400"
-                                : "border-blue-500 text-blue-400"
+                              participant.paymentMethod === "Cash"
+                                ? "border-green-500 text-green-400 bg-green-900/10"
+                                : "border-blue-500 text-blue-400 bg-blue-900/10"
                             }
                           >
-                            {participant.payment_method}
+                            {participant.paymentMethod}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          {participant.payment_method === "bKash" ? participant.transaction_id : "-"}
+                        <TableCell className="text-slate-300">
+                          {participant.paymentMethod === "bKash" ? (participant.transactionId || "-") : "-"}
                         </TableCell>
                         <TableCell>
                           <Badge
                             className={
                               participant.amount >= 400
-                                ? "bg-green-500/20 text-green-400"
-                                : "bg-yellow-500/20 text-yellow-400"
+                                ? "bg-green-500/20 text-green-400 border border-green-400/30"
+                                : "bg-yellow-500/20 text-yellow-400 border border-yellow-400/30"
                             }
                           >
-                            {participant.amount >= 400 ? "Paid Minimum" : "Below Minimum"}
+                            {participant.amount >= 400 ? "✓ Paid Minimum" : "⚠ Below Minimum"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">

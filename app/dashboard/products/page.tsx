@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { supabase } from "@/lib/supabase"
+import { JsonDatabase } from "@/lib/json-db"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,35 +35,6 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Loader2 } from "lucide-react"
-import { getPaidParticipantsCount, markProductAsManuallyAdjusted } from "@/lib/product-utils"
-
-// Sample data for when Supabase is not configured
-const sampleProducts = [
-  {
-    id: "prod1",
-    name: "Biriyani",
-    price: 150,
-    quantity: 12,
-    purchase_status: "not_purchased",
-    manually_adjusted: null,
-  },
-  {
-    id: "prod2",
-    name: "Juice",
-    price: 30,
-    quantity: 12,
-    purchase_status: "purchased",
-    manually_adjusted: null,
-  },
-  {
-    id: "prod3",
-    name: "Water",
-    price: 15,
-    quantity: 12,
-    purchase_status: "not_purchased",
-    manually_adjusted: null,
-  },
-]
 
 // Form schema for product validation
 const productFormSchema = z.object({
@@ -122,18 +93,10 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setIsLoading(true)
-
-      // Check if Supabase is configured
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        setProducts(sampleProducts)
-        return sampleProducts
-      }
-
-      const { data, error } = await supabase.from("products").select("*").order("name")
-
-      if (error) throw error
-      setProducts(data || [])
-      return data || []
+      JsonDatabase.initialize()
+      const data = JsonDatabase.getProducts().sort((a, b) => a.name.localeCompare(b.name))
+      setProducts(data)
+      return data
     } catch (error) {
       console.error("Error fetching products:", error)
       toast({
@@ -141,9 +104,7 @@ export default function ProductsPage() {
         title: "Error",
         description: "Failed to load products. Please try again.",
       })
-      // Fall back to sample data
-      setProducts(sampleProducts)
-      return sampleProducts
+      return []
     } finally {
       setIsLoading(false)
     }
@@ -152,14 +113,13 @@ export default function ProductsPage() {
   // Function to fetch paid participants count
   const fetchPaidParticipantsCount = async () => {
     try {
-      const count = await getPaidParticipantsCount()
-      setPaidParticipantsCount(count)
-      return count
+      const { paidCount } = JsonDatabase.getFinancialData()
+      setPaidParticipantsCount(paidCount)
+      return paidCount
     } catch (error) {
       console.error("Error fetching paid participants count:", error)
-      // Fall back to sample count
-      setPaidParticipantsCount(12)
-      return 12
+      setPaidParticipantsCount(0)
+      return 0
     }
   }
 
@@ -177,68 +137,20 @@ export default function ProductsPage() {
   useEffect(() => {
     refreshData()
 
-    // Set up real-time subscription for products
-    const productsSubscription = supabase
-      .channel("products-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "products",
-        },
-        () => {
-          refreshData()
-        },
-      )
-      .subscribe()
-
-    // Set up real-time subscription for participants
-    const participantsSubscription = supabase
-      .channel("participants-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "participants",
-        },
-        () => {
-          fetchPaidParticipantsCount()
-        },
-      )
-      .subscribe()
-
-    return () => {
-      productsSubscription.unsubscribe()
-      participantsSubscription.unsubscribe()
+    // Listen for database changes
+    const handleDatabaseChange = () => {
+      refreshData()
     }
+
+    window.addEventListener("databaseChange", handleDatabaseChange)
+    return () => window.removeEventListener("databaseChange", handleDatabaseChange)
   }, [])
 
   // Handle form submission (add/update product)
   const onSubmit = async (values: ProductFormValues) => {
     setIsSubmitting(true)
     try {
-      console.log("Submitting product form:", values)
-
-      // Check if Supabase is available
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        // Demo mode - update local state
-        if (editingProduct) {
-          setProducts(products.map((p) => (p.id === editingProduct.id ? { ...editingProduct, ...values } : p)))
-        } else {
-          setProducts([...products, { ...values, id: `prod${Date.now()}` }])
-        }
-
-        toast({
-          title: "Success",
-          description: editingProduct ? "Product updated successfully" : "Product added successfully",
-        })
-
-        setShowAddForm(false)
-        setEditingProduct(null)
-        return
-      }
+      console.log("[v0] Submitting product form:", values)
 
       // Check for duplicate product name
       const isDuplicate = products.some(
@@ -256,58 +168,41 @@ export default function ProductsPage() {
       }
 
       if (editingProduct) {
-        console.log("Updating product:", editingProduct.id, values)
+        console.log("[v0] Updating product:", editingProduct.id, values)
 
-        // Check if quantity was changed
-        const quantityChanged = editingProduct.quantity !== values.quantity
-
-        // Update existing product
-        const { error } = await supabase
-          .from("products")
-          .update({
-            name: values.name,
-            price: values.price,
-            quantity: values.quantity,
-            purchase_status: values.purchase_status,
-            manually_adjusted: quantityChanged ? true : editingProduct.manually_adjusted,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", editingProduct.id)
-
-        if (error) {
-          console.error("Error updating product:", error)
-          throw error
-        }
-
-        // If quantity was changed, mark as manually adjusted
-        if (quantityChanged) {
-          await markProductAsManuallyAdjusted(editingProduct.id)
-        }
-
-        console.log("Product updated successfully")
-        toast({
-          title: "Success",
-          description: "Product updated successfully",
-        })
-      } else {
-        console.log("Adding new product:", values)
-        // Add new product
-        const { error } = await supabase.from("products").insert({
+        const updated = JsonDatabase.updateProduct(editingProduct.id, {
           name: values.name,
           price: values.price,
           quantity: values.quantity,
-          purchase_status: values.purchase_status,
-          manually_adjusted: values.quantity !== paidParticipantsCount ? true : null,
+          status: values.purchase_status === "purchased" ? "Purchased" : "Not Purchased",
         })
 
-        if (error) {
-          console.error("Error adding product:", error)
-          throw error
+        if (!updated) {
+          throw new Error("Failed to update product")
         }
 
-        console.log("Product added successfully")
+        console.log("[v0] Product updated successfully")
         toast({
-          title: "Success",
+          title: "Success ✨",
+          description: "Product updated successfully",
+        })
+      } else {
+        console.log("[v0] Adding new product:", values)
+        
+        const added = JsonDatabase.addProduct({
+          name: values.name,
+          price: values.price,
+          quantity: values.quantity,
+          status: values.purchase_status === "purchased" ? "Purchased" : "Not Purchased",
+        })
+
+        if (!added) {
+          throw new Error("Failed to add product")
+        }
+
+        console.log("[v0] Product added successfully")
+        toast({
+          title: "Success ✨",
           description: "Product added successfully",
         })
       }
@@ -336,24 +231,18 @@ export default function ProductsPage() {
     if (!productToDelete) return
 
     try {
-      console.log("Deleting product:", productToDelete)
+      console.log("[v0] Deleting product:", productToDelete)
 
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        const { error } = await supabase.from("products").delete().eq("id", productToDelete)
+      const success = JsonDatabase.deleteProduct(productToDelete)
 
-        if (error) {
-          console.error("Error deleting product:", error)
-          throw error
-        }
-
-        console.log("Product deleted successfully")
-      } else {
-        // Demo mode - update local state
-        setProducts(products.filter((p) => p.id !== productToDelete))
+      if (!success) {
+        throw new Error("Failed to delete product")
       }
 
+      console.log("[v0] Product deleted successfully")
+
       toast({
-        title: "Success",
+        title: "Success ✨",
         description: "Product deleted successfully",
       })
 
@@ -373,34 +262,22 @@ export default function ProductsPage() {
 
   // Toggle product purchase status
   const togglePurchaseStatus = async (productId: string, currentStatus: string) => {
-    const newStatus = currentStatus === "purchased" ? "not_purchased" : "purchased"
+    const newStatus = currentStatus === "Purchased" ? "Not Purchased" : "Purchased"
 
     try {
-      console.log("Toggling product status:", productId, "from", currentStatus, "to", newStatus)
+      console.log("[v0] Toggling product status:", productId, "from", currentStatus, "to", newStatus)
 
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        const { error } = await supabase
-          .from("products")
-          .update({
-            purchase_status: newStatus,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", productId)
+      const updated = JsonDatabase.updateProduct(productId, { status: newStatus })
 
-        if (error) {
-          console.error("Error updating product status:", error)
-          throw error
-        }
-
-        console.log("Product status updated successfully")
-      } else {
-        // Demo mode - update local state
-        setProducts(products.map((p) => (p.id === productId ? { ...p, purchase_status: newStatus } : p)))
+      if (!updated) {
+        throw new Error("Failed to update product status")
       }
 
+      console.log("[v0] Product status updated successfully")
+
       toast({
-        title: "Status Updated",
-        description: `Product marked as ${newStatus === "purchased" ? "purchased" : "not purchased"}`,
+        title: "Status Updated ✨",
+        description: `Product marked as ${newStatus.toLowerCase()}`,
       })
 
       // Refresh data
