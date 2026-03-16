@@ -50,11 +50,11 @@ export default function FinancialSummary() {
 
   if (loading) {
     return (
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-blue-100">Financial Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">
+      <div>
+        <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">Financial Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-slate-800/50 rounded-lg"></div>
+            <div key={i} className="h-32 bg-neutral-200 dark:bg-neutral-700 rounded-lg animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -62,71 +62,68 @@ export default function FinancialSummary() {
   }
 
   return (
-    <div className="mt-6">
-      <h2 className="text-xl font-semibold mb-4 text-blue-100 flex items-center">
-        <div className="w-5 h-5 mr-2 relative">
-          <div className="w-4 h-4 bg-blue-500 rounded-full absolute left-0 top-0.5"></div>
-          <div className="w-3 h-3 bg-slate-900 rounded-full absolute left-1.5 top-0.5"></div>
-        </div>
+    <div>
+      <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
+        <span>💰</span>
         Financial Overview
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-900 to-blue-950 border-blue-700/30 text-white ramadan-card">
+        <Card className="card bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <p className="text-blue-300">Total Collected</p>
-              <Wallet className="h-5 w-5 text-blue-400" />
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Total Collected</p>
+              <Wallet className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-2xl font-bold mt-2">৳{financialData.totalCollected.toLocaleString()}</p>
-            <p className="text-sm text-blue-300 mt-1">{financialData.participantCount} participants</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-white mt-2">৳{financialData.totalCollected.toLocaleString()}</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">{financialData.participantCount} participants</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-blue-800/30 text-white ramadan-card">
+        <Card className="card bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <p className="text-blue-300">Total Spent</p>
-              <TrendingDown className="h-5 w-5 text-red-400" />
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Total Spent</p>
+              <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
-            <p className="text-2xl font-bold mt-2">৳{financialData.totalSpent.toLocaleString()}</p>
-            <div className="mt-2">
-              <div className="flex justify-between text-xs mb-1">
-                <span>{spendingPercentage}% of budget used</span>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-white mt-2">৳{financialData.totalSpent.toLocaleString()}</p>
+            <div className="mt-3 space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-neutral-600 dark:text-neutral-400">{spendingPercentage}% used</span>
               </div>
-              <Progress value={spendingPercentage} className="h-1.5 bg-blue-950" indicatorClassName="bg-blue-500" />
+              <Progress value={spendingPercentage} className="h-1.5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-900 to-blue-950 border-blue-700/30 text-white ramadan-card">
+        <Card className="card bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <p className="text-blue-300">Remaining Balance</p>
-              <TrendingUp className="h-5 w-5 text-green-400" />
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Remaining Balance</p>
+              <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
-            <p className="text-2xl font-bold mt-2">৳{financialData.totalRemaining.toLocaleString()}</p>
-            <p className="text-sm text-blue-300 mt-1">
+            <p className="text-3xl font-bold text-neutral-900 dark:text-white mt-2">৳{financialData.totalRemaining.toLocaleString()}</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
               {financialData.totalCollected
                 ? Math.round((financialData.totalRemaining / financialData.totalCollected) * 100)
                 : 0}
-              % of funds remaining
+              % remaining
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-blue-800/30 text-white ramadan-card">
+        <Card className="card bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <p className="text-blue-300">Average Contribution</p>
-              <DollarSign className="h-5 w-5 text-blue-400" />
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Average Contribution</p>
+              <DollarSign className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
-            <p className="text-2xl font-bold mt-2">
+            <p className="text-3xl font-bold text-neutral-900 dark:text-white mt-2">
               ৳
               {financialData.participantCount
                 ? Math.round(financialData.totalCollected / financialData.participantCount).toLocaleString()
                 : 0}
             </p>
-            <p className="text-sm text-blue-300 mt-1">Minimum required: ৳400</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">Min: ৳400</p>
           </CardContent>
         </Card>
       </div>

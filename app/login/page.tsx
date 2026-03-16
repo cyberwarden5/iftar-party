@@ -69,80 +69,42 @@ export default function LoginPage() {
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-950 via-amber-900 to-amber-900 relative overflow-hidden">
-      <style>{`
-        @keyframes float-star {
-          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
-          50% { transform: translateY(-25px) rotate(180deg); opacity: 0.8; }
-        }
-        .floating-star {
-          animation: float-star 4s ease-in-out infinite;
-        }
-        @keyframes swing {
-          0%, 100% { transform: rotate(-3deg); }
-          50% { transform: rotate(3deg); }
-        }
-        .lantern {
-          animation: swing 3s ease-in-out infinite;
-        }
-      `}</style>
-
-      {/* Floating stars background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="floating-star absolute text-xl"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${i * 0.15}s`,
-            }}
-          >
-            ✨
-          </div>
-        ))}
-      </div>
-
-      {/* Lanterns decoration */}
-      <div className="absolute top-8 left-8 text-4xl lantern">🏮</div>
-      <div className="absolute bottom-8 right-8 text-4xl lantern" style={{ animationDelay: '1.5s' }}>
-        🏮
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800">
       {/* Main content */}
-      <div className="relative z-10 w-full max-w-md px-6">
-        {/* Theme Toggle Button */}
+      <div className="w-full max-w-md px-4 py-8">
+        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="absolute top-4 right-4 p-3 rounded-full bg-amber-400/20 backdrop-blur hover:bg-amber-400/30 transition-all duration-300 border border-amber-400/30"
+          className="absolute top-4 right-4 p-2 rounded-full bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
           aria-label="Toggle theme"
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {isDark ? '☀️' : '🌙'}
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8 pt-8">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="text-6xl animate-pulse">🌙</div>
-              <div className="absolute top-0 right-0 text-2xl">⭐</div>
-              <div className="absolute bottom-0 left-0 text-2xl">⭐</div>
-            </div>
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="mb-6 inline-block">
+            <div className="text-6xl">🌙</div>
           </div>
-          <h1 className="text-4xl font-bold text-amber-50 mb-2" style={{ fontFamily: 'Cormorant Garamond' }}>
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
             BATCH-22
           </h1>
-          <p className="text-amber-200 text-lg font-semibold">IFTAR PARTY MANAGER</p>
-          <p className="text-amber-300 text-sm mt-2">🌙 Ramadan 2025 🌙</p>
+          <p className="text-lg font-semibold text-neutral-600 dark:text-neutral-300">
+            Iftar Party Manager
+          </p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">
+            Ramadan 2025
+          </p>
         </div>
 
-        {/* Glass card */}
-        <div className="glass-effect bg-white/[0.07] backdrop-blur-2xl border border-amber-400/20 rounded-3xl p-8 shadow-2xl">
+        {/* Login Card */}
+        <div className="card p-8 shadow-md animate-slide-in">
           <form onSubmit={handleLogin} className="space-y-6">
+            {/* Access Code Input */}
             <div>
-              <label className="block text-amber-100 text-sm font-semibold mb-3">
-                🔐 Enter Access Code
+              <label className="block text-sm font-semibold text-neutral-900 dark:text-white mb-2">
+                Access Code
               </label>
               <input
                 type="password"
@@ -151,40 +113,49 @@ export default function LoginPage() {
                   setCode(e.target.value);
                   setError('');
                 }}
-                placeholder="✨ Enter your magical words sir"
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-amber-300/40 text-amber-50 placeholder-amber-300/60 focus:outline-none focus:border-amber-300 focus:bg-white/20 transition duration-300"
+                placeholder="Enter your access code"
+                className="w-full px-4 py-2.5 rounded-8 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-colors"
                 disabled={isLoading}
+                autoFocus
               />
             </div>
 
+            {/* Error Message */}
             {error && (
-              <div className="p-4 bg-red-500/20 border border-red-400/50 rounded-lg text-red-200 text-sm animate-pulse">
+              <div className="p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm font-medium animate-slide-in">
                 {error}
               </div>
             )}
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading || !code}
-              className="w-full ramadan-button py-3 rounded-lg font-bold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-amber-400/50"
+              className="w-full btn btn-primary py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '🕌 Authenticating...' : '✨ Enter Dashboard'}
+              {isLoading ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Authenticating...
+                </>
+              ) : (
+                'Enter Dashboard'
+              )}
             </button>
           </form>
 
-          {/* Decorative divider */}
-          <div className="mt-8 pt-6 border-t border-amber-300/30">
-            <p className="text-center text-amber-200 text-xs">
-              🎉 Blessed Month of Ramadan 🌙
+          {/* Footer Note */}
+          <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+            <p className="text-center text-xs text-neutral-500 dark:text-neutral-400">
+              © 2025 Aftab Kabir. All rights reserved.
             </p>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-amber-300 text-xs">
-            © 2025 Aftab Kabir. All rights reserved. 🙏
-          </p>
+        {/* Info Box */}
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-700 dark:text-blue-300 animate-fade-in">
+          <p className="font-medium mb-1">Demo Access</p>
+          <p className="text-xs">Use code: <code className="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded font-mono">AFTABx7766</code></p>
         </div>
       </div>
     </div>
