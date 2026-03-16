@@ -51,14 +51,14 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Desktop Navigation */}
       <header className="header">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link
               href="/dashboard"
-              className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white flex items-center gap-2"
+              className="text-xl md:text-2xl font-bold text-foreground flex items-center gap-2"
             >
               <span className="text-2xl">🌙</span>
               <span>Iftar Manager</span>
@@ -68,17 +68,17 @@ export default function DashboardLayout({
             <div className="flex md:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-neutral-600 dark:text-neutral-400">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Toggle menu</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent
                   side="right"
-                  className="w-[250px] bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 p-0"
+                  className="w-[250px] bg-card border-border p-0"
                 >
-                  <SheetHeader className="border-b border-neutral-200 dark:border-neutral-700 p-4">
-                    <SheetTitle className="text-neutral-900 dark:text-white">
+                  <SheetHeader className="border-b border-border p-4">
+                    <SheetTitle className="text-foreground">
                       Menu
                     </SheetTitle>
                   </SheetHeader>
@@ -90,8 +90,8 @@ export default function DashboardLayout({
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                           isActive(item.path)
-                            ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
-                            : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                         }`}
                       >
                         <item.icon className="h-4 w-4" />
@@ -103,7 +103,7 @@ export default function DashboardLayout({
                         setIsMobileMenuOpen(false)
                         handleLogout()
                       }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-error hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
                       Logout
@@ -121,8 +121,8 @@ export default function DashboardLayout({
                   href={item.path}
                   className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive(item.path)
-                      ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
-                      : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -135,13 +135,13 @@ export default function DashboardLayout({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    className="ml-2 text-muted-foreground hover:text-foreground hover:bg-secondary"
                   >
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
-                  <DropdownMenuItem onClick={handleLogout} className="text-error cursor-pointer focus:text-error dark:focus:text-error">
+                <DropdownMenuContent align="end" className="w-40 bg-card border-border">
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer focus:text-destructive">
                     <LogOut className="h-4 w-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
@@ -159,7 +159,7 @@ export default function DashboardLayout({
 
       <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
 
-      <footer className="border-t border-neutral-200 dark:border-neutral-700 p-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
+      <footer className="border-t border-border p-4 text-center text-sm text-muted-foreground">
         <div className="container mx-auto">
           <p>© {new Date().getFullYear()} Aftab Kabir. All rights reserved.</p>
         </div>

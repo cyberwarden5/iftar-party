@@ -68,22 +68,22 @@ export default function FinancialSummary() {
         Financial Overview
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="card bg-gradient-to-br from-primary-50 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-800/20 border-primary-200 dark:border-primary-800">
+        <Card className="card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">Total Collected</p>
-              <Wallet className="h-5 w-5 text-primary-600" />
+              <Wallet className="h-5 w-5 text-primary" />
             </div>
             <p className="text-3xl font-bold text-foreground mt-2">৳{financialData.totalCollected.toLocaleString()}</p>
             <p className="text-xs text-muted-foreground mt-2">{financialData.participantCount} participants</p>
           </CardContent>
         </Card>
 
-        <Card className="card bg-gradient-to-br from-error/10 to-error/5 dark:from-error/20 dark:to-error/10 border-error/20 dark:border-error/40">
+        <Card className="card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">Total Spent</p>
-              <TrendingDown className="h-5 w-5 text-error" />
+              <TrendingDown className="h-5 w-5 text-destructive" />
             </div>
             <p className="text-3xl font-bold text-foreground mt-2">৳{financialData.totalSpent.toLocaleString()}</p>
             <div className="mt-3 space-y-2">
@@ -95,7 +95,7 @@ export default function FinancialSummary() {
           </CardContent>
         </Card>
 
-        <Card className="card bg-gradient-to-br from-success/10 to-success/5 dark:from-success/20 dark:to-success/10 border-success/20 dark:border-success/40">
+        <Card className="card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">Remaining Balance</p>
@@ -111,7 +111,7 @@ export default function FinancialSummary() {
           </CardContent>
         </Card>
 
-        <Card className="card bg-gradient-to-br from-warning/10 to-warning/5 dark:from-warning/20 dark:to-warning/10 border-warning/20 dark:border-warning/40">
+        <Card className="card">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">Average Contribution</p>
@@ -123,7 +123,7 @@ export default function FinancialSummary() {
                 ? Math.round(financialData.totalCollected / financialData.participantCount).toLocaleString()
                 : 0}
             </p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">Min: ৳400</p>
+            <p className="text-xs text-muted-foreground mt-2">Min: ৳400</p>
           </CardContent>
         </Card>
       </div>
