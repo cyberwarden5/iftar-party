@@ -1,19 +1,8 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import { Poppins, Cormorant_Garamond } from 'next/font/google';
-import './globals.css';
+import '../styles/globals.css';
 
-const poppins = Poppins({
-  variable: '--font-poppins',
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: '--font-cormorant',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-});
+// No need for custom fonts as they're imported in globals.css
 
 export const metadata: Metadata = {
   title: 'Iftar Party Manager - Ramadan 2025',
@@ -30,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -45,7 +34,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${poppins.variable} ${cormorant.variable}`}>
+      <body>
         {children}
       </body>
     </html>

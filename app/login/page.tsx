@@ -69,13 +69,12 @@ export default function LoginPage() {
   if (!isMounted) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800">
-      {/* Main content */}
-      <div className="w-full max-w-md px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-background dark:bg-background">
+      <div className="w-full max-w-md px-4 py-8 space-y-6">
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="absolute top-4 right-4 p-2 rounded-full bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+          className="absolute top-4 right-4 p-2.5 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
           aria-label="Toggle theme"
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
@@ -83,27 +82,25 @@ export default function LoginPage() {
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="mb-6 inline-block">
-            <div className="text-6xl">🌙</div>
-          </div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-2">
+        <div className="text-center animate-fade-in">
+          <div className="mb-4 text-5xl">🌙</div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             BATCH-22
           </h1>
-          <p className="text-lg font-semibold text-neutral-600 dark:text-neutral-300">
+          <p className="text-base font-semibold text-muted-foreground">
             Iftar Party Manager
           </p>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">
+          <p className="text-sm text-muted-foreground/80 mt-2">
             Ramadan 2025
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="card p-8 shadow-md animate-slide-in">
-          <form onSubmit={handleLogin} className="space-y-6">
+        <div className="card p-8 animate-slide-in">
+          <form onSubmit={handleLogin} className="space-y-5">
             {/* Access Code Input */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-900 dark:text-white mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-foreground">
                 Access Code
               </label>
               <input
@@ -114,7 +111,7 @@ export default function LoginPage() {
                   setError('');
                 }}
                 placeholder="Enter your access code"
-                className="w-full px-4 py-2.5 rounded-8 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-colors"
+                className="w-full px-4 py-2.5 rounded-lg border border-input bg-card text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10 transition-colors"
                 disabled={isLoading}
                 autoFocus
               />
@@ -122,7 +119,7 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm font-medium animate-slide-in">
+              <div className="p-3.5 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm font-medium animate-slide-in">
                 {error}
               </div>
             )}
@@ -131,7 +128,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading || !code}
-              className="w-full btn btn-primary py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -145,17 +142,17 @@ export default function LoginPage() {
           </form>
 
           {/* Footer Note */}
-          <div className="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-            <p className="text-center text-xs text-neutral-500 dark:text-neutral-400">
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-center text-xs text-muted-foreground">
               © 2025 Aftab Kabir. All rights reserved.
             </p>
           </div>
         </div>
 
         {/* Info Box */}
-        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-700 dark:text-blue-300 animate-fade-in">
+        <div className="p-4 bg-info/10 border border-info/20 rounded-lg text-info/90 text-sm animate-fade-in">
           <p className="font-medium mb-1">Demo Access</p>
-          <p className="text-xs">Use code: <code className="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded font-mono">AFTABx7766</code></p>
+          <p className="text-xs">Use code: <code className="bg-info/20 px-2 py-1 rounded font-mono">AFTABx7766</code></p>
         </div>
       </div>
     </div>
