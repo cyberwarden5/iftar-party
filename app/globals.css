@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Golden Ramadan Theme - Light Mode */
+  --bg-light: #faf9f7;
+  --bg-light-secondary: #f5f3f0;
+  --bg-light-tertiary: #ede9e3;
+  --text-light: #2d2520;
+  --text-light-secondary: #5a5047;
+  --gold-primary: #d4af37;
+  --gold-secondary: #c19a3d;
+  --gold-accent: #f4d03f;
+  --white: #ffffff;
+  --border-light: #e8e0d5;
+
+  /* Dark Mode */
+  --bg-dark: #0f0d0b;
+  --bg-dark-secondary: #1a1612;
+  --bg-dark-tertiary: #2a2419;
+  --text-dark: #f5f3f0;
+  --text-dark-secondary: #d4af37;
+  --border-dark: #3a3228;
+
+  /* Shared Colors */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+}
+
+html.dark .glass-effect {
+  background: rgba(15, 13, 11, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* Ramadan Card */
+.ramadan-card {
+  background: linear-gradient(135deg, rgba(250, 249, 247, 0.95), rgba(245, 243, 240, 0.9));
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+html.dark .ramadan-card {
+  background: linear-gradient(135deg, rgba(15, 13, 11, 0.95), rgba(26, 22, 18, 0.9));
+  border-color: var(--border-dark);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ramadan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.15);
+}
+
+html.dark .ramadan-card:hover {
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.25);
+}
+
+/* Ramadan Button */
+.ramadan-button {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+  color: var(--text-light);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.ramadan-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: left 0.3s ease;
+}
+
+.ramadan-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+}
+
+.ramadan-button:hover::before {
+  left: 100%;
+}
+
+.ramadan-button:active {
+  transform: translateY(0);
+}
+
+/* Ramadan Header */
+.ramadan-header {
+  background: linear-gradient(135deg, rgba(250, 249, 247, 0.98), rgba(245, 243, 240, 0.95));
+  border-bottom: 2px solid var(--gold-primary);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+
+html.dark .ramadan-header {
+  background: linear-gradient(135deg, rgba(15, 13, 11, 0.98), rgba(26, 22, 18, 0.95));
+  border-bottom-color: var(--border-dark);
+}
+
+/* Scroll bar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-light-secondary);
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: var(--bg-dark-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold-primary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-secondary);
+}
+
+/* Moon and Star decorations */
+.ramadan-moon {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 70% 30%, rgba(212, 175, 55, 0.8), rgba(212, 175, 55, 0.3));
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  position: relative;
+}
+
+.ramadan-moon::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 40px;
+  background: inherit;
+  border-radius: 50%;
+  top: 5px;
+  right: -10px;
+  filter: blur(1px);
+}
+
+.ramadan-stars {
+  position: relative;
+  display: inline-block;
+}
+
+.ramadan-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--gold-primary);
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Ramadan Lantern */
+.ramadan-lantern {
+  position: relative;
+  width: 30px;
+  height: 40px;
+  background: linear-gradient(to right, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.3));
+  border: 2px solid var(--gold-primary);
+  border-radius: 8px;
+  animation: swing 2s ease-in-out infinite;
+}
+
+@keyframes swing {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 20px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.theme-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gold-primary);
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Financial Summary Cards */
+.financial-card {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+  border: 1px solid var(--gold-primary);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+html.dark .financial-card {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.08));
+}
+
+.financial-card h3 {
+  color: var(--gold-primary);
+  font-size: 14px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.financial-card .amount {
+  color: var(--text-light);
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+html.dark .financial-card .amount {
+  color: var(--gold-primary);
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ramadan-card {
+    padding: 16px;
+  }
+
+  .ramadan-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}
