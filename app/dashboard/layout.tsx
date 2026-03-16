@@ -51,39 +51,35 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient text-white font-poppins ramadan-pattern">
+    <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
       {/* Desktop Navigation */}
-      <header className="sticky top-0 z-10 border-b border-blue-800/30 backdrop-blur-md bg-black/50 ramadan-header">
-        <div className="container mx-auto px-4 py-3">
+      <header className="header">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link
               href="/dashboard"
-              className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent flex items-center"
+              className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white flex items-center gap-2"
             >
-              <div className="mr-2 hidden md:flex items-center">
-                <div className="w-6 h-6 bg-blue-500 rounded-full relative overflow-hidden">
-                  <div className="absolute w-5 h-5 bg-slate-900 rounded-full -right-2 top-0.5"></div>
-                </div>
-              </div>
-              Iftar Party Organizer
+              <span className="text-2xl">🌙</span>
+              <span>Iftar Manager</span>
             </Link>
 
             {/* Mobile Menu Button */}
             <div className="flex md:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-blue-300">
+                  <Button variant="ghost" size="icon" className="text-neutral-600 dark:text-neutral-400">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Toggle menu</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent
                   side="right"
-                  className="w-[80%] bg-gradient-to-br from-slate-900 to-blue-950 border-blue-800/30 p-0"
+                  className="w-[250px] bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 p-0"
                 >
-                  <SheetHeader className="border-b border-blue-800/30 p-4">
-                    <SheetTitle className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                      Iftar Party Organizer
+                  <SheetHeader className="border-b border-neutral-200 dark:border-neutral-700 p-4">
+                    <SheetTitle className="text-neutral-900 dark:text-white">
+                      Menu
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col py-2">
@@ -92,13 +88,13 @@ export default function DashboardLayout({
                         key={item.path}
                         href={item.path}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 text-base ${
+                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                           isActive(item.path)
-                            ? "bg-blue-800/30 text-blue-100"
-                            : "text-blue-300 hover:bg-blue-950/50 hover:text-blue-100"
+                            ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
+                            : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700"
                         }`}
                       >
-                        <item.icon className="h-5 w-5" />
+                        <item.icon className="h-4 w-4" />
                         {item.label}
                       </Link>
                     ))}
@@ -107,9 +103,9 @@ export default function DashboardLayout({
                         setIsMobileMenuOpen(false)
                         handleLogout()
                       }}
-                      className="flex items-center gap-3 px-4 py-3 text-base text-red-400 hover:bg-red-950/20"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-error hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
-                      <LogOut className="h-5 w-5" />
+                      <LogOut className="h-4 w-4" />
                       Logout
                     </button>
                   </div>
@@ -123,10 +119,10 @@ export default function DashboardLayout({
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive(item.path)
-                      ? "bg-blue-800/30 text-blue-100"
-                      : "text-blue-300 hover:text-blue-100 hover:bg-blue-950/50"
+                      ? "bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
+                      : "text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -139,14 +135,13 @@ export default function DashboardLayout({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-2 text-blue-300 hover:text-blue-100 hover:bg-blue-950/50"
+                    className="ml-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   >
-                    <span className="sr-only md:not-sr-only md:mr-2">Account</span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 bg-slate-900 border-blue-800/30">
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-400 focus:text-red-400 cursor-pointer">
+                <DropdownMenuContent align="end" className="w-40 bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700">
+                  <DropdownMenuItem onClick={handleLogout} className="text-error cursor-pointer focus:text-error dark:focus:text-error">
                     <LogOut className="h-4 w-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
@@ -162,9 +157,9 @@ export default function DashboardLayout({
         <GlobalFinancialSummary />
       </div>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
 
-      <footer className="border-t border-blue-800/30 p-4 text-center text-sm text-slate-400">
+      <footer className="border-t border-neutral-200 dark:border-neutral-700 p-4 text-center text-sm text-neutral-600 dark:text-neutral-400">
         <div className="container mx-auto">
           <p>© {new Date().getFullYear()} Aftab Kabir. All rights reserved.</p>
         </div>
