@@ -1,0 +1,261 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║            🎊 IFTAR PARTY MANAGER - QUICK START GUIDE 🎊            ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+
+🚀 START HERE
+═════════════════════════════════════════════════════════════════════════
+
+1. OPEN THE APP
+   → Go to http://localhost:3000 (or your deployment URL)
+   → You'll see the beautiful home page
+
+2. CLICK "GET STARTED"
+   → You'll be taken to the login page
+
+3. ENTER ACCESS CODE
+   → Code: AFTABx7766 (default)
+   → Click "Enter Dashboard"
+   → Welcome! 🎉
+
+
+📋 MAIN FEATURES
+═════════════════════════════════════════════════════════════════════════
+
+1. DASHBOARD
+   - View financial overview
+   - See recent participants
+   - Quick navigation
+   - Click on cards to go to sections
+
+2. PARTICIPANTS
+   - Click "Add Participant"
+   - Enter: Name, Amount, Payment Method
+   - For bKash: Add Transaction ID
+   - Click "Add Participant"
+   - Done! ✅
+
+3. PRODUCTS
+   - Click "Add Product"
+   - Enter: Name, Price, Quantity
+   - Select: Purchased or Not Purchased
+   - Click "Add Product"
+   - Edit or Delete anytime
+
+4. FINANCES
+   - See total collected
+   - See total spent
+   - View balance
+   - Export as PDF
+
+5. SETTINGS
+   - Add custom access codes
+   - Change event details
+   - Delete codes (except default)
+   - Add your organization name
+
+
+🎨 THEME & CUSTOMIZATION
+═════════════════════════════════════════════════════════════════════════
+
+TOGGLE THEME
+- Click the icon in top-right (☀️ or 🌙)
+- Switch between Dark Mode and Light Mode
+
+CUSTOMIZE SETTINGS
+- Go to Settings page
+- Update event name, date, venue
+- Change minimum participation amount
+- Manage access codes
+
+
+📊 FINANCIAL TRACKING
+═════════════════════════════════════════════════════════════════════════
+
+AUTOMATIC CALCULATIONS
+- Total Collected = Sum of all participant amounts
+- Total Spent = Sum of (product price × quantity)
+- Balance = Total Collected - Total Spent
+- Average = Total Collected ÷ Number of Participants
+- Paid Count = Participants with amount ≥ ৳400
+
+REAL-TIME UPDATES
+- Everything updates instantly
+- No need to refresh
+- All devices sync automatically
+
+
+🔐 SECURITY
+═════════════════════════════════════════════════════════════════════════
+
+DEFAULT ACCESS CODE
+- Code: AFTABx7766
+- Cannot be deleted
+- Use for first login
+
+ADD CUSTOM CODES
+- Go to Settings
+- Click "Add New Access Code"
+- Enter unique code
+- Enter your name
+- Click "Add Access Code"
+
+MANAGE CODES
+- View all access codes in Settings
+- Delete custom codes anytime
+- Cannot delete default code
+
+
+💾 DATA STORAGE
+═════════════════════════════════════════════════════════════════════════
+
+WHERE IS DATA STORED?
+- Browser localStorage
+- Automatically saved
+- Not on any server
+
+DATA SAFETY
+- All data is local
+- Complete privacy
+- Never shared
+- You have full control
+
+BACKUP DATA
+- Use export functionality
+- Save as backup file
+- Restore anytime
+
+
+📱 MOBILE USE
+═════════════════════════════════════════════════════════════════════════
+
+RESPONSIVE DESIGN
+- Works on any device
+- Touch-friendly buttons
+- Mobile-optimized menus
+- Easy navigation
+
+OFFLINE READY
+- Works without internet
+- Perfect for events
+- No wifi required
+
+
+🎯 TIPS & TRICKS
+═════════════════════════════════════════════════════════════════════════
+
+FASTER DATA ENTRY
+- Use Tab key to move between fields
+- Numbers have numeric keyboard on mobile
+- Default amount is ৳400
+
+BATCH OPERATIONS
+- Add all participants first
+- Then add all products
+- Then update as needed
+
+FINANCIAL MANAGEMENT
+- Green = Paid minimum (≥৳400)
+- Yellow = Below minimum (<৳400)
+- Check finances regularly
+
+EXPORT REPORTS
+- Go to Finances page
+- Click "Download PDF"
+- Share with team
+
+
+⚠️ COMMON QUESTIONS
+═════════════════════════════════════════════════════════════════════════
+
+Q: Forgot access code?
+A: Default is: AFTABx7766
+
+Q: Lost data?
+A: Check Settings > Access Codes to verify auth works
+   Check if localStorage is enabled in browser
+
+Q: Can I use on multiple devices?
+A: Not automatically. You need to backup/restore manually.
+
+Q: Is my data safe?
+A: Completely safe. All data is local, never sent anywhere.
+
+Q: Can I add more than 1000 entries?
+A: Yes! localStorage can handle 5-10MB (years of data).
+
+Q: How do I delete everything?
+A: Go to browser > Settings > Clear cache/localStorage
+
+Q: Does it work offline?
+A: Yes! Works perfectly without internet.
+
+Q: Can I export the data?
+A: Yes! Use the export functionality in the app.
+
+
+🔧 TROUBLESHOOTING
+═════════════════════════════════════════════════════════════════════════
+
+LOGIN NOT WORKING
+1. Check if code is correct (case-sensitive)
+2. Make sure Caps Lock is off
+3. Try clearing browser cache
+4. Reload the page
+
+DATA NOT SAVING
+1. Check if localStorage is enabled
+2. Try a different browser
+3. Clear cache and retry
+4. Check browser storage settings
+
+THEME NOT CHANGING
+1. Refresh the page
+2. Clear cache
+3. Check browser history
+4. Hard refresh (Ctrl+Shift+R)
+
+SLOW PERFORMANCE
+1. Clear browser cache
+2. Disable extensions
+3. Try incognito mode
+4. Use latest browser version
+
+
+📞 NEED HELP?
+═════════════════════════════════════════════════════════════════════════
+
+READ GUIDES
+- COMPLETE_SETUP.md - Full user guide
+- DATABASE_MIGRATION.md - Technical details
+- PROJECT_STATUS.md - Feature overview
+- CHANGELOG.md - What's new
+
+CHECK DOCUMENTATION
+- In-app error messages
+- Form validation messages
+- Toast notifications
+- Browser console (F12)
+
+
+🎉 YOU'RE ALL SET!
+═════════════════════════════════════════════════════════════════════════
+
+The app is ready to use. Start by:
+
+1. Login with code: AFTABx7766
+2. Click on "Participants"
+3. Add a new participant
+4. Add products
+5. View your financial summary
+
+Enjoy! 🌙✨
+
+
+═════════════════════════════════════════════════════════════════════════
+Status: ✅ Ready to Use
+Version: 1.0.0
+Date: March 17, 2026
+═════════════════════════════════════════════════════════════════════════

@@ -7,97 +7,40 @@ import { DollarSign, Package, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import FinancialSummary from "@/components/financial-summary"
-import { supabase } from "@/lib/supabase"
-
-// Sample data for when Supabase is not configured
-const sampleParticipants = [
-  {
-    id: "1",
-    name: "Ahmed Khan",
-    date: new Date().toISOString(),
-    amount: 500,
-    payment_method: "Cash",
-  },
-  {
-    id: "2",
-    name: "Fatima Rahman",
-    date: new Date(Date.now() - 86400000).toISOString(),
-    amount: 400,
-    payment_method: "bKash",
-  },
-  {
-    id: "3",
-    name: "Mohammad Ali",
-    date: new Date(Date.now() - 172800000).toISOString(),
-    amount: 350,
-    payment_method: "Cash",
-  },
-]
+import { JsonDatabase } from "@/lib/json-db"
 
 export default function Dashboard() {
   const [recentParticipants, setRecentParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [supabaseAvailable, setSupabaseAvailable] = useState(true)
 
   useEffect(() => {
-    // Check if Supabase is configured
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setSupabaseAvailable(false)
-      setRecentParticipants(sampleParticipants)
-      setIsLoading(false)
-      return
+    // Initialize database
+    JsonDatabase.initialize()
+    
+    // Load recent participants
+    const participants = JsonDatabase.getParticipants()
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5)
+    setRecentParticipants(participants)
+    setIsLoading(false)
+
+    // Listen for database changes
+    const handleDatabaseChange = (event: any) => {
+      const updatedParticipants = event.detail.participants
+        .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5)
+      setRecentParticipants(updatedParticipants)
     }
 
-    async function fetchRecentParticipants() {
-      try {
-        setIsLoading(true)
-        const { data, error } = await supabase
-          .from("participants")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(5)
-
-        if (error) throw error
-        setRecentParticipants(data || [])
-      } catch (error) {
-        console.error("Error fetching recent participants:", error)
-        // Fall back to sample data
-        setRecentParticipants(sampleParticipants)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchRecentParticipants()
-
-    // Only set up subscription if Supabase is available
-    if (supabaseAvailable) {
-      const subscription = supabase
-        .channel("participants-changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "participants",
-          },
-          () => {
-            fetchRecentParticipants()
-          },
-        )
-        .subscribe()
-
-      return () => {
-        subscription.unsubscribe()
-      }
-    }
-  }, [supabaseAvailable])
+    window.addEventListener("databaseChange", handleDatabaseChange)
+    return () => window.removeEventListener("databaseChange", handleDatabaseChange)
+  }, [])
 
   return (
     <div className="container mx-auto p-4">
       <FinancialSummary />
 
-      <div className="mt-8">
+      <div className="mt-8 animate-fade-in">
         <h2 className="text-xl font-semibold mb-4 text-blue-100">Recent Participants</h2>
         {isLoading ? (
           <div className="animate-pulse space-y-4">
@@ -106,21 +49,23 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-blue-800/30">
+          <div className="overflow-hidden rounded-lg border border-blue-800/30 ramadan-card backdrop-blur-md">
             <div className="bg-slate-900/50 p-4">
               {recentParticipants.length === 0 ? (
                 <p className="text-center py-4 text-slate-400">No participants added yet</p>
               ) : (
                 <ul className="divide-y divide-blue-800/30">
-                  {recentParticipants.map((participant) => (
-                    <li key={participant.id} className="py-3 flex justify-between items-center">
+                  {recentParticipants.map((participant, idx) => (
+                    <li key={participant.id} className="py-3 flex justify-between items-center hover:bg-blue-950/20 transition-colors duration-300 px-2 rounded" style={{
+                      animation: `slideIn 0.3s ease-out ${idx * 0.1}s backwards`
+                    }}>
                       <div>
-                        <p className="font-medium">{participant.name}</p>
+                        <p className="font-medium text-white">{participant.name}</p>
                         <p className="text-sm text-slate-400">{new Date(participant.date).toLocaleDateString()}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">৳{participant.amount.toLocaleString()}</p>
-                        <p className="text-sm text-slate-400">{participant.payment_method}</p>
+                        <p className="font-medium text-green-400">৳{participant.amount.toLocaleString()}</p>
+                        <p className="text-sm text-slate-400">{participant.paymentMethod}</p>
                       </div>
                     </li>
                   ))}
@@ -132,14 +77,6 @@ export default function Dashboard() {
                 <Link href="/dashboard/participants">View All Participants</Link>
               </Button>
             </div>
-          </div>
-        )}
-
-        {!supabaseAvailable && (
-          <div className="mt-4 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-md text-yellow-200">
-            <p className="text-sm">
-              <strong>Note:</strong> Displaying sample data. Connect Supabase for real-time data.
-            </p>
           </div>
         )}
       </div>

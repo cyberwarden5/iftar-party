@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LocalStorageManager } from '@/lib/local-storage';
+import { JsonDatabase } from '@/lib/json-db';
 
 export default function LoginPage() {
   const [code, setCode] = useState('');
@@ -13,6 +13,9 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Initialize database
+    JsonDatabase.initialize();
+    
     setIsMounted(true);
     const theme = localStorage.getItem('theme') || 'dark';
     setIsDark(theme === 'dark');
@@ -27,9 +30,7 @@ export default function LoginPage() {
     const newTheme = isDark ? 'light' : 'dark';
     setIsDark(!isDark);
     localStorage.setItem('theme', newTheme);
-    const data = LocalStorageManager.getData();
-    data.settings.theme = newTheme as 'light' | 'dark';
-    LocalStorageManager.saveData(data);
+    JsonDatabase.updateSettings({ theme: newTheme as 'light' | 'dark' });
 
     if (newTheme === 'light') {
       document.documentElement.classList.remove('dark');
@@ -44,11 +45,18 @@ export default function LoginPage() {
     setError('');
 
     try {
-      if (LocalStorageManager.verifyAuthCode(code)) {
+      if (JsonDatabase.verifyAuthCode(code)) {
         localStorage.setItem('authenticated', 'true');
-        router.push('/dashboard');
+        
+        // Set cookie for middleware verification
+        document.cookie = 'iftar_auth=true; path=/; max-age=2592000'; // 30 days
+        
+        // Small delay to ensure cookie is set
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 100);
       } else {
-        setError('❌ Invalid access code.');
+        setError('❌ Invalid access code. Please try again.');
       }
     } catch (err) {
       setError('⚠️ An error occurred. Please try again.');

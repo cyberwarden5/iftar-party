@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
-import { supabase } from "@/lib/supabase"
+import { JsonDatabase } from "@/lib/json-db"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ import {
 
 const formSchema = z.object({
   code: z.string().min(6, { message: "Access code must be at least 6 characters" }),
-  created_by: z.string().min(2, { message: "Creator name is required" }),
+  createdBy: z.string().min(2, { message: "Creator name is required" }),
 })
 
 export default function SettingsPage() {
@@ -39,41 +39,30 @@ export default function SettingsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: "",
-      created_by: "",
+      createdBy: "",
     },
   })
 
   useEffect(() => {
+    JsonDatabase.initialize()
     fetchAccessCodes()
 
-    // Set up real-time subscription
-    const subscription = supabase
-      .channel("auth-codes-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "auth_codes",
-        },
-        () => {
-          fetchAccessCodes()
-        },
-      )
-      .subscribe()
-
-    return () => {
-      subscription.unsubscribe()
+    // Listen for database changes
+    const handleDatabaseChange = () => {
+      fetchAccessCodes()
     }
+
+    window.addEventListener("databaseChange", handleDatabaseChange)
+    return () => window.removeEventListener("databaseChange", handleDatabaseChange)
   }, [])
 
-  async function fetchAccessCodes() {
+  function fetchAccessCodes() {
     try {
       setIsLoading(true)
-      const { data, error } = await supabase.from("auth_codes").select("*").order("created_at", { ascending: false })
-
-      if (error) throw error
-      setAccessCodes(data || [])
+      const codes = JsonDatabase.getAuthCodes().sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      setAccessCodes(codes)
     } catch (error) {
       console.error("Error fetching access codes:", error)
       toast({
@@ -88,19 +77,24 @@ export default function SettingsPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const { error } = await supabase.from("auth_codes").insert({
-        code: values.code,
-        created_by: values.created_by,
-      })
+      const added = JsonDatabase.addAuthCode(values.code, values.createdBy)
 
-      if (error) throw error
+      if (!added) {
+        toast({
+          variant: "destructive",
+          title: "Duplicate Code",
+          description: "This access code already exists.",
+        })
+        return
+      }
 
       toast({
-        title: "Success",
+        title: "Success ✨",
         description: "New access code added successfully",
       })
 
       form.reset()
+      fetchAccessCodes()
     } catch (error) {
       console.error("Failed to add access code:", error)
       toast({
@@ -127,14 +121,18 @@ export default function SettingsPage() {
         return
       }
 
-      const { error } = await supabase.from("auth_codes").delete().eq("id", codeToDelete)
+      const success = JsonDatabase.deleteAuthCode(codeToDelete)
 
-      if (error) throw error
+      if (!success) {
+        throw new Error("Failed to delete access code")
+      }
 
       toast({
-        title: "Success",
+        title: "Success ✨",
         description: "Access code deleted successfully",
       })
+      
+      fetchAccessCodes()
     } catch (error) {
       console.error("Failed to delete access code:", error)
       toast({
@@ -221,12 +219,12 @@ export default function SettingsPage() {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-blue-100">Access Code</FormLabel>
+                      <FormLabel className="text-blue-100">🔐 Access Code</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter new access code"
+                          placeholder="e.g., SecurePass123"
                           {...field}
-                          className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500"
+                          className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500 focus:border-blue-400 focus:ring focus:ring-blue-400/20 transition-all duration-300"
                         />
                       </FormControl>
                       <FormMessage />
@@ -236,15 +234,15 @@ export default function SettingsPage() {
 
                 <FormField
                   control={form.control}
-                  name="created_by"
+                  name="createdBy"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-blue-100">Created By</FormLabel>
+                      <FormLabel className="text-blue-100">👤 Created By</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your name"
                           {...field}
-                          className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500"
+                          className="bg-slate-900/50 border-blue-800/30 text-white placeholder:text-slate-500 focus:border-blue-400 focus:ring focus:ring-blue-400/20 transition-all duration-300"
                         />
                       </FormControl>
                       <FormMessage />
